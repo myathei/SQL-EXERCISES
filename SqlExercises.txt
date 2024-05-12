@@ -1,0 +1,540 @@
+Question 1. Write a solution to find the ids of products that are both low fat and recyclable.
+
+		Answer: SELECT product_id
+			FROM Products
+			WHERE low_fats = 'Y' AND recyclable = 'Y';
+
+
+Question 2. Find the names of the customer that are not referred by the customer with id = 2.
+		
+		Answer : SELECT name 
+			 FROM Customer
+			 WHERE COALESCE(referee_id, 0) != 2;
+
+
+Question 3. A country is big if:
+		it has an area of at least three million (i.e., 3000000 km2), or
+		it has a population of at least twenty-five million (i.e., 25000000).
+		Write a solution to find the name, population, and area of the big countries.
+
+		Answer : SELECT  * 
+			 FROM world 
+			 WHERE area >= 3000000 OR population >= 25000000
+
+
+Question 4. Write a solution to find all the authors that viewed at least one of their own articles.
+
+		Answer : SELECT DISTINCT author_id AS id
+			 FROM Views
+			 WHERE author_id = viewer_id
+			 ORDER BY id ASC;
+
+
+Question 5. Write a solution to find the IDs of the invalid tweets. The tweet is invalid if the number of characters used in the content of the tweet is 	    strictly greater than 15.
+
+		Answer : SELECT tweet_id
+			 FROM Tweets
+			 WHERE CHAR_LENGTH(content) > 15;
+
+
+
+Question 6. Write a solution to show the unique ID of each user, If a user does not have a unique ID replace just show null.
+
+		Answer : SELECT EmployeeUNI.unique_id, Employees.name
+			 FROM Employees
+			 LEFT JOIN EmployeeUNI on Employees.id = EmployeeUNI.id;
+
+
+Question 7. Write a solution to report the product_name, year, and price for each sale_id in the Sales table.
+
+		Answer : SELECT 
+    				p.product_name, 
+    				s.year, 
+   			 	s.price
+			FROM Sales s
+				JOIN 
+    				Product p ON s.product_id = p.product_id;
+
+
+Question 8. Write a solution to find the IDs of the users who visited without making any transactions and the number of times they made these types of 		    visits.
+
+		Answer : SELECT customer_id, COUNT(*) AS count_no_trans 
+			 FROM Visits AS v 
+  				LEFT JOIN Transactions AS t ON v.visit_id = t.visit_id 
+			 WHERE t.visit_id IS NULL 
+			 GROUP BY customer_id;
+
+
+
+Question 9. Write a solution to find all dates' Id with higher temperatures compared to its previous dates (yesterday).
+
+		Answer : SELECT w1.id
+			 FROM Weather w1
+			 JOIN Weather w2
+			 ON DATEDIFF(w1.recordDate, w2.recordDate) = 1
+			 WHERE 
+    			 w1.temperature > w2.temperature;
+
+
+Question 10. There is a factory website that has several machines each running the same number of processes. Write a solution to find the average time each 	     machine takes to complete a process.
+
+		Answer : SELECT machine_id,
+    			 ROUND( AVG( CASE WHEN activity_type = 'start' THEN -timestamp ELSE timestamp END) * 2, 
+			 FROM activity
+			 GROUP BY machine_id;
+
+
+Question 11. Write a solution to report the name and bonus amount of each employee with a bonus less than 1000.
+
+		Answer : SELECT
+    			 Employee.name, Bonus.bonus
+			 FROM Employee
+        		 LEFT JOIN
+    				Bonus ON Employee.empid = Bonus.empid
+			 WHERE
+   			 bonus < 1000 OR bonus IS NULL;
+
+
+Question 12. Write a solution to find the number of times each student attended each exam.
+
+		Answer : SELECT s.student_id, s.student_name, sj.subject_name, count(e.subject_name) AS attended_exams 
+			 FROM Students s 
+			 JOIN Subjects sj 
+			 LEFT JOIN Examinations e ON s.student_id = e.student_id AND e.subject_name  = sj.subject_name 
+			 GROUP BY s.student_id, s.student_name, sj.subject_name
+			 ORDER BY s.student_id;
+
+
+Question 13. Write a solution to find managers with at least five direct reports.
+
+		Answer : SELECT E1.name
+			 FROM Employee E1
+			 JOIN (
+   			 SELECT managerId, COUNT(*) AS directReports
+  			 FROM Employee
+    			 GROUP BY managerId
+    			 HAVING COUNT(*) >= 5
+			 ) E2 ON E1.id = E2.managerId;
+
+
+Question 14. The confirmation rate of a user is the number of 'confirmed' messages divided by the total number of requested confirmation messages. The 		     confirmation rate of a user that did not request any confirmation messages is 0. Round the confirmation rate to two decimal places.
+	     Write a solution to find the confirmation rate of each user.
+
+		Answer :SELECT s.user_id,
+    			CASE 
+        			WHEN COUNT(m.action) = 0 THEN 0.00
+        			ELSE ROUND(SUM(CASE WHEN m.action = 'confirmed' THEN 1 ELSE 0 END) / COUNT(m.action), 2)
+    			END AS confirmation_rate
+			FROM Signups s
+			LEFT JOIN 
+   				 messages m ON s.user_id = m.user_id
+			GROUP BY s.user_id;
+
+
+
+Question 15. Write a solution to report the movies with an odd-numbered ID and a description that is not "boring".
+
+		Answer :SELECT *
+			FROM Cinema
+				WHERE description <> 'boring' and MOD(id,2) <> 0
+			ORDER BY rating DESC;
+
+
+Question 16. Write a solution to find the average selling price for each product. average_price should be rounded to 2 decimal places.
+
+		Answer : SELECT s.product_id,
+    				ROUND(SUM(p.units * s.price) / SUM(s.units), 2) AS average_price
+			 FROM Prices s
+			 JOIN
+    				UnitsSold p ON s.product_id = p.product_id AND p.pruchase_date BETWEEN s.start_date AND s.end_date
+			 GROUP BY s.product_id;
+
+
+
+Question 17. Write an SQL query that reports the average experience years of all the employees for each project, rounded to 2 digits.
+
+		Answer : SELECT project_id,
+    			 	ROUND(AVG(experience_years), 2) AS average_years
+			 FROM Project p
+			 JOIN Employee e
+			 ON p.employee_id = e.employee_id
+			 GROUP BY project_id;
+
+
+Question 18. Write a solution to find the percentage of the users registered in each contest rounded to two decimals.Return the result table ordered by 	     percentage in descending order. In case of a tie, order it by contest_id in ascending order.
+
+		Answer : SELECT contest_id, 
+  				COUNT(DISTINCT user_id) AS unique_users
+			 FROM Register
+			 GROUP BY contest_id;
+
+
+Question 19. We define query quality as:
+
+		The average of the ratio between query rating and its position.
+		We also define poor query percentage as:
+		The percentage of all queries with rating less than 3.
+		Write a solution to find each query_name, the quality and poor_query_percentage.
+		Both quality and poor_query_percentage should be rounded to 2 decimal places.
+
+		Answer :SELECT query_name,
+    				ROUND(AVG(rating / position), 2) AS quality,
+    				ROUND((SUM(CASE WHEN rating < 3 THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS poor_query_percentage
+			FROM Queries
+			GROUP BY query_name;
+
+
+
+Question 20. Write an SQL query to find for each month and country, the number of transactions and their total amount, the number of approved transactions 	     and their total amount.
+
+		Answer : SELECT
+    			 DATE_FORMAT(transaction_date, '%Y-%m') AS month, country,
+    				COUNT(id) AS trans_count,
+    				SUM(amount) AS trans_total_amount,
+    				SUM(CASE WHEN state = 'approved' THEN 1 ELSE 0 END) AS approved_count,
+    				SUM(CASE WHEN state = 'approved' THEN amount ELSE 0 END) AS approved_total_amount
+			FROM transactions
+			GROUP BY DATE_FORMAT(transaction_date, '%Y-%m'), country;
+
+
+Question 21. If the customer's preferred delivery date is the same as the order date, then the order is called immediate; otherwise, it is called scheduled.
+	     The first order of a customer is the order with the earliest order date that the customer made. It is guaranteed that a customer has precisely    	     one first order.
+	     Write a solution to find the percentage of immediate orders in the first orders of all customers, rounded to 2 decimal places.
+
+		Answer :SELECT
+    				ROUND((SUM(CASE WHEN order_date = customer_pref_delivery_date THEN 1 ELSE 0 END) / COUNT(DISTINCT customer_id)) * 100, 2) AS 				immediate__percentage
+			FROM Delivery d
+			JOIN (
+    				SELECT customer_id,
+        				MIN(order_date) AS first_order_date
+    				FROM Delivery
+    				GROUP BY customer_id
+			) AS first_orders ON d.customer_id = first_orders.customer_id AND d.order_date = first_orders.first_order_date;
+
+
+Question 22. Write a solution to report the fraction of players that logged in again on the day after the day they first logged in, rounded to 2 decimal 	     places. In other words, you need to count the number of players that logged in for at least two consecutive days starting from their first 	     login date, then divide that number by the total number of players.
+
+		Answer : SELECT
+  				ROUND(COUNT(A1.player_id)/ (SELECT COUNT(DISTINCT A3.player_id) FROM Activity A3), 2) AS fraction
+			 FROM Activity A1
+			 WHERE
+  				(A1.player_id, DATE_SUB(A1.event_date, INTERVAL 1 DAY)) IN (
+    				SELECT A2.player_id, MIN(A2.event_date)
+    				FROM Activity A2
+    				GROUP BY A2.player_id);
+
+
+Question 23. Write a solution to calculate the number of unique subjects each teacher teaches in the university.
+
+		Answer : SELECT  teacher_id , count(distinct subject_id ) as cnt from Teacher
+			 GROUP BY teacher_id;
+
+
+
+Question 24. Write a solution to find the daily active user count for a period of 30 days ending 2019-07-27 inclusively. A user was active on someday if 	     they made at least one activity on that day.
+
+		Answer : SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
+			 FROM Activity;
+
+
+Question 25. Write a solution to select the product id, year, quantity, and price for the first year of every product sold.
+
+		Answer : SELECT product_id, year AS first_year, quantity, price 
+			 FROM Sales 
+			 WHERE (product_id, year) IN (
+    				SELECT product_id, MIN(year) AS year 
+    				FROM Sales 
+    				GROUP BY product_id);
+
+
+Question 26. Write a solution to find all the classes that have at least five students.
+
+		Answer : SELECT class
+			 FROM Courses
+			 GROUP BY class
+			 HAVING COUNT(student) >= 5;
+
+
+Question 27. Write a solution that will, for each user, return the number of followers. Return the result table ordered by user_id in ascending order.
+
+		Answer : SELECT user_id, COUNT(user_id) AS followers_count
+			 FROM followers
+			 GROUP BY user_id
+			 ORDER BY user_id ASC;
+
+
+Question 28.	A single number is a number that appeared only once in the MyNumbers table.Find the largest single number. If there is no single number, 		report null.
+
+		Answer : SELECT MAX(num) AS num
+			 FROM (
+    				SELECT num
+    				FROM MyNumbers
+    				GROUP BY num
+    				HAVING COUNT(num) = 1
+				) AS unique_numbers;
+
+
+Question 29. Write a solution to report the customer ids from the Customer table that bought all the products in the Product table. Return the result table 	     in any order.
+
+		Answer :  SELECT order_num, COUNT(*) number, AVG (total_price) average
+    			  FROM items
+    			  GROUP BY order_num
+       			  HAVING COUNT(DISTINCT *) > 2;
+
+
+Question 30. For this problem, we will consider a manager an employee who has at least 1 other employee reporting to them.Write a solution to report the ids 	     and the names of all managers, the number of employees who report directly to them, and the average age of the reports rounded to the nearest 	     integer.
+
+		Answer : SELECT reports_to AS employee_id, (
+    					SELECT name 
+    					FROM employees e1 
+    					WHERE e.reports_to = e1.employee_id) AS name, COUNT(reports_to) AS reports_count, ROUND(AVG(age) AS average_age 
+					FROM employees e 
+					GROUP BY reports_to 
+					HAVING reports_count > 0 
+					ORDER BY employee_id;
+
+
+Question 31. Employees can belong to multiple departments. When the employee joins other departments, they need to decide which department is their primary 	     department. Note that when an employee belongs to only one department, their primary column is 'N'. Write a solution to report all the 		     employees with their primary department. For employees who belong to one department, report their only department.
+
+		Answer : SELECT employee_id, department_id 
+			 FROM (
+    				SELECT  *, 
+      				COUNT(employee_id) OVER(PARTITION BY employee_id) AS EmployeeCount
+    				FROM Employe) EmployeePartition 
+				WHERE EmployeeCount = 1 OR primary_flag = 'Y';
+
+
+Question 32. Report for every three line segments whether they can form a triangle.
+
+		Answer : SELECT *, IF(x+y>z and y+z>x and z+x>y, "Yes", "No") as triangle FROM Triangle;
+
+
+Question 33. Find all numbers that appear at least three times consecutively.
+
+		Answer : SELECT DISTINCT l1.Num AS ConsecutiveNums
+			 FROM Logs l1, Logs l2, Logs l3
+			 WHERE l1.Id = l2.Id - 1
+    				AND l2.Id = l3.Id - 1
+    				AND l1.Num = l2.Num
+    				AND l2.Num = l3.Num;
+
+
+Question 34. Write a solution to find the prices of all products on 2019-08-16. Assume the price of all products before any change is 10.
+
+		Answer : SELECT product_id, 10 AS price
+			 FROM Products
+			 GROUP BY product_id
+			 HAVING MIN(change_date) > '2019-08-16'
+			UNION ALL
+				SELECT product_id, new_price AS price
+				FROM Products
+				WHERE (product_id, change_date) IN (
+    					SELECT
+     					 product_id, MAX(change_date)
+   					 FROM Products
+    					 WHERE change_date <= '2019-08-16'
+    				GROUP BY product_id);
+
+
+Question 35. There is a queue of people waiting to board a bus. However, the bus has a weight limit of 1000 kilograms, so there may be some people who 			cannot board. Write a solution to find the person_name of the last person that can fit on the bus without exceeding the weight limit. The 		test cases are generated such that the first person does not exceed the weight limit.
+
+		Answer : SELECT top 1 person_name
+			 FROM
+			(SELECT person_name,turn,
+			sum(weight)over(order by turn) as cum
+			FROM queue) a
+			WHERE cum <= 1000
+			ORDER BY turn desc;
+
+
+Question 36. Write a solution to calculate the number of bank accounts for each salary category. The salary categories are:
+		"Low Salary": All the salaries strictly less than $20000.
+		"Average Salary": All the salaries in the inclusive range [$20000, $50000].
+		"High Salary": All the salaries strictly greater than $50000.
+		The result table must contain all three categories. If there are no accounts in a category, return 0.
+
+		Answer : SELECT category, SUM(accounts_count) AS accounts_count
+			FROM (
+    			SELECT
+        		CASE 
+            			WHEN income < 20000 THEN 'Low Salary'
+            			WHEN income BETWEEN 20000 AND 50000 THEN 'Average Salary'
+            			ELSE 'High Salary'
+        		END AS category,
+        			COUNT(*) AS accounts_count
+    			FROM Accounts 
+    			GROUP BY category
+    			UNION SELECT 'Low Salary', 0
+    			UNION SELECT 'Average Salary', 0
+    			UNION SELECT 'High Salary', 0
+			) AS grouped_categories
+			GROUP BY category;
+
+
+Question 37. Find the IDs of the employees whose salary is strictly less than $30000 and whose manager left the company. When a manager leaves the company, 		their information is deleted from the Employees table, but the reports still have their manager_id set to the manager that left.Return the 		result table ordered by employee_id.
+
+		Answer : SELECT e1.employee_id
+			FROM Employees e1
+			LEFT JOIN Employees e2
+			ON e1.manager_id = e2.employee_id
+			WHERE e1.salary < 30000 AND e2.employee_id IS NULL AND e1.manager_id IS NOT NULL
+			ORDER BY employee_id;
+
+
+Question 38. Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not 	swapped.Return the result table ordered by id in ascending order.
+
+		Answer :SELECT 
+    			CASE 
+        		WHEN id = (SELECT MAX(id) FROM seat) AND id % 2 = 1
+            			THEN id 
+        			WHEN id % 2 = 1
+            		THEN id + 1
+        		ELSE id - 1
+    			END AS id,student
+			FROM seat
+			ORDER BY id;
+
+
+Question 39. Write a solution to:
+		Find the name of the user who has rated the greatest number of movies. In case of a tie, return the lexicographically smaller user name.
+		Find the movie name with the highest average rating in February 2020. In case of a tie, return the lexicographically smaller movie name.
+
+		Answer : (SELECT name AS results
+			FROM MovieRating JOIN Users USING(user_id)
+			GROUP BY name
+			ORDER BY COUNT(*) DESC, name LIMIT 1) UNION ALL
+			(SELECT title AS results
+			FROM MovieRating JOIN Movies USING(movie_id)
+			WHERE EXTRACT(YEAR_MONTH FROM created_at) = 202002
+			GROUP BY title
+			ORDER BY AVG(rating) DESC, title
+			LIMIT 1);
+
+
+Question 40. You are the restaurant owner and you want to analyze a possible expansion (there will be at least one customer every day).Compute the moving 		average of how much the customer paid in a seven days window (i.e., current day + 6 days before). average_amount should be rounded to two 		decimal places.Return the result table ordered by visited_on in ascending order.
+
+		Answer : SELECT visited_on,
+    				(
+        			SELECT SUM(amount)
+        			FROM customer
+        			WHERE visited_on BETWEEN DATE_SUB(c.visited_on, INTERVAL 6 DAY) AND c.visited_on
+    				) AS amount,
+    				ROUND(
+        			(
+           			SELECT SUM(amount) / 7
+            			FROM customer
+            			WHERE visited_on BETWEEN DATE_SUB(c.visited_on, INTERVAL 6 DAY) AND c.visited_on),2) AS average_amount
+				FROM customer c
+				WHERE visited_on >= (
+        				SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 DAY)
+        				FROM custome)
+				GROUP BY visited_on;
+
+
+Question 41. Write a solution to find the people who have the most friends and the most friends number.The test cases are generated so that only one person 		has the most friends.
+
+		Answer : WITH Accepters AS
+    			(SELECT accepter_id AS id, COUNT(accepter_id) AS num
+    			FROM RequestAccepted
+    			GROUP BY accepter_id),
+			Requesters AS
+    				(SELECT requester_id AS id, COUNT(requester_id) AS num
+    				FROM RequestAccepted
+    				GROUP BY requester_id),
+			Final AS
+    				(SELECT id, sum(num) as num FROM
+        			(SELECT * FROM Accepters UNION ALL SELECT * FROM Requesters) AS a
+    				GROUP BY id)
+			SELECT * FROM Final
+			WHERE num = (SELECT MAX(num) FROM Final);
+
+
+Question 42.Write a solution to report the sum of all total investment values in 2016 tiv_2016, for all policyholders who:
+		have the same tiv_2015 value as one or more other policyholders, and are not located in the same city as any other policyholder (i.e., the 		(lat, lon) attribute pairs must be unique).
+		Round tiv_2016 to two decimal places.
+
+		Answer : SELECT ROUND(SUM(tiv_2016), 2) AS tiv_2016
+			FROM Insurance
+			WHERE tiv_2015 IN (
+    				SELECT tiv_2015
+    				FROM Insurance
+    				GROUP BY tiv_2015
+    				HAVING COUNT(*) > 1)
+				AND (lat, lon) IN (
+    					SELECT lat, lon
+    					FROM Insurance
+    					GROUP BY lat, lon
+    					HAVING COUNT(*) = 1);
+
+
+Question 43. A company's executives are interested in seeing who earns the most money in each of the company's departments. A high earner in a department is 		an employee who has a salary in the top three unique salaries for that department.Write a solution to find the employees who are high 			earners in each of the departments.
+
+		Answer : SELECT Department, Employee, Salary
+			FROM (
+    				SELECT 
+        			d.name AS Department,
+        			e.name AS Employee,
+        			e.salary AS Salary,
+        			DENSE_RANK() OVER (PARTITION BY d.name ORDER BY Salary DESC) AS rnk
+    				FROM Employee e
+    				JOIN Department d
+    				ON e.departmentId = d.id) AS rnk_tbl
+				WHERE rnk <= 3;
+
+
+Question 44. Write a solution to fix the names so that only the first character is uppercase and the rest are lowercase.Return the result table ordered by 		user_id.
+
+		Answer : SELECT user_id, CONCAT(UPPER(LEFT(name, 1)), LCASE(SUBSTRING(name, 2))) AS name
+			FROM Users
+			ORDER BY user_id;
+
+
+Question 45. Write a solution to find the patient_id, patient_name, and conditions of the patients who have Type I Diabetes. Type I Diabetes always starts 	with DIAB1 prefix.
+
+		Answer : SELECT patient_id, patient_name, conditions
+			FROM Patients
+			WHERE conditions LIKE 'DIAB1%' OR conditions LIKE '% DIAB1%';
+
+
+Question 46. Write a solution to delete all duplicate emails, keeping only one unique email with the smallest id.
+		For SQL users, please note that you are supposed to write a DELETE statement and not a SELECT one.
+		For Pandas users, please note that you are supposed to modify Person in place.
+		After running your script, the answer shown is the Person table. The driver will first compile and run your piece of code and then show the 		Person table. The final order of the Person table does not matter.
+
+		Answer : DELETE p1 
+			FROM Person p1, Person p2
+			WHERE p1.Email = p2.Email AND p1.Id > p2.Id;
+
+
+Question 47. Write a solution to find the second highest salary from the Employee table. If there is no second highest salary, return null (return None in 		Pandas).
+
+		Answer : SELECT
+				(SELECT DISTINCT Salary 
+			FROM Employee ORDER BY salary desc 
+			limit 1 offset 1) as SecondHighestSalary;
+
+
+Question 48. Write a solution to find for each date the number of different products sold and their names.
+		The sold products names for each date should be sorted lexicographically.
+		Return the result table ordered by sell_date.
+
+		Answer : SELECT sell_date, COUNT( DISTINCT product ) as num_sold ,
+    			GROUP_CONCAT( DISTINCT product order by product ASC separator ',' ) as products
+        		FROM Activities GROUP BY sell_date order by sell_date ASC;
+
+
+Question 49. Write a solution to get the names of products that have at least 100 units ordered in February 2020 and their amount.
+
+		Answer : SELECT  p.product_name, SUM(o.unit) AS unit
+			FROM Products p
+			INNER JOIN Orders o ON p.product_id = o.product_id AND MONTH(o.order_date) = 2 AND YEAR(order_date) = 2020
+			GROUP BY o.product_id HAVING unit >= 100;
+
+
+Question 50. Write a solution to find the users who have valid emails.
+		A valid e-mail has a prefix name and a domain where:
+		The prefix name is a string that may contain letters (upper or lower case), digits, underscore '_', period '.', and/or dash '-'. The prefix 		name must start with a letter.
+		The domain is '@leetcode.com'.
+
+		Answer : SELECT * FROM Users
+			 WHERE regexp_like(mail, '^[A-Za-z]+[A-Za-z0-9\_\.\-]*@leetcode\\.com$');
